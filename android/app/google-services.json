@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "697797555143",
+    "project_id": "taskidoo-63669",
+    "storage_bucket": "taskidoo-63669.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:697797555143:android:fed77dfbd819c896441fe2",
+        "android_client_info": {
+          "package_name": "com.example.project_taskidoo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZhudVBLy4n1S-Cjs8Hnpv-y_h0MZzOdQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:697797555143:android:a42284ca6504a4a2441fe2",
+        "android_client_info": {
+          "package_name": "com.example.taskidofixed"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZhudVBLy4n1S-Cjs8Hnpv-y_h0MZzOdQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
