@@ -22,9 +22,9 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _pages = [
     Center(child: Text('Home page')),
-    Center(child: Text('Projects Page')),
+    Center(child: Text('Tasks Page')),
     Center(child: Text('Profile page')),
-    Center(child: Text('Messages page')),
+    Center(child: Text('Projects page')),
   ];
 
   @override
@@ -32,36 +32,17 @@ class _HomePageState extends State<HomePage> {
     String formattedDate = DateFormat('EEEE, d').format(DateTime.now());
     return Scaffold(
       appBar: AppBar(
-        leading: PopupMenuButton<String>(
-          icon: const Icon(
-            Icons.menu,
-            color: Colors.blue,
-          ),
-          onSelected: (value) {
-            print('Selected: $value');
-          },
-          itemBuilder: (BuildContext context) => [
-            const PopupMenuItem(
-              value: 'option 1',
-              child: Text('tasks'),
-            ),
-            const PopupMenuItem(
-              value: 'option 2',
-              child: Text('projects'),
-            ),
-            const PopupMenuItem(
-              value: 'option 1',
-              child: Text('teams'),
-            ),
-          ],
-        ),
         title: Text(
           formattedDate,
           style: const TextStyle(
-            fontSize: 25, fontWeight: FontWeight.bold, color: Colors.black,
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
         ),
         centerTitle: true,
+        backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.blue),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 16.0),
@@ -70,13 +51,75 @@ class _HomePageState extends State<HomePage> {
                 Icons.exit_to_app,
                 color: Colors.blue,
               ),
-              onPressed: () async{
+              onPressed: () async {
                 await FirebaseAuth.instance.signOut();
                 Navigator.pushReplacementNamed(context, '/login');
               },
             ),
-          )
+          ),
         ],
+      ),
+      drawer: Drawer(
+        child: Column(
+          children: [
+            // Drawer Header
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blueAccent,
+                image: DecorationImage(
+                  image: AssetImage('assets/header_image.jpg'), // Replace with your asset
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  'Taskidoo Menu',
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+
+            // Drawer Items
+            ListTile(
+              leading: Icon(Icons.check_circle, color: Colors.blue),
+              title: Text('Tasks', style: TextStyle(fontSize: 18)),
+              onTap: () {
+                Navigator.pushNamed(context, '/task-page');
+                print('Tasks clicked');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.folder, color: Colors.orange),
+              title: Text('Projects', style: TextStyle(fontSize: 18)),
+              onTap: () {
+                Navigator.pushNamed(context, '/project-page');
+                print('Projects clicked');
+              },
+            ),
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.settings, color: Colors.grey),
+              title: Text('Settings', style: TextStyle(fontSize: 18)),
+              onTap: () {
+                Navigator.pushNamed(context, '/settings-page');
+                print('Settings clicked');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.info, color: Colors.purple),
+              title: Text('About', style: TextStyle(fontSize: 18)),
+              onTap: () {
+                Navigator.pop(context);
+                print('About clicked');
+              },
+            ),
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -87,13 +130,13 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.all(20.0),
               child: Text(
                 "Let's make a lot of good habits together",
-                style: TextStyle(fontSize: 28),
+                style: TextStyle(fontSize: 22),
               ),
             ),
             CardSlider(),
             Container(
               height: 500,
-              padding: const EdgeInsets.all(16.0), // Optional: Adds padding around the container
+              padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12.0),
                 color: Colors.white,
@@ -106,7 +149,7 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,  // Align the title and arrow to the left
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -130,23 +173,21 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),  // Add spacing between the title/arrow and the list
+                  SizedBox(height: 16),
                   Expanded(
                     child: Progresscardlist(),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20), // Add spacing between widgets
+            const SizedBox(height: 20),
           ],
         ),
       ),
-
       bottomNavigationBar: Navbar(
         currentIndex: _currentIndex,
-        onTabChanged: _onTabChanged, // Pass the tab change handler
+        onTabChanged: _onTabChanged,
       ),
-
     );
   }
 }

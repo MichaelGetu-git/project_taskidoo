@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:project_taskidoo/widgets/taskdetailpage.dart';
 
 class CardSlider extends StatelessWidget {
   final String taskCollection = "tasks"; // Replace with your Firebase collection name
@@ -56,8 +57,11 @@ class CardSlider extends StatelessWidget {
                       subtitle: taskData['taskSubtitle'] ?? "No subtitle",
                       startTime: taskData['startTime'] ?? "00:00",
                       endTime: taskData['endTime'] ?? "00:00",
+                      progress: taskData['progress'] ?? 0.0,
                       avatars: avatars,
                       color: Colors.blue, // Customize based on task priority
+                      context: context,
+                      taskId: task.id,
                     );
                   },
                 );
@@ -89,26 +93,7 @@ class CardSlider extends StatelessWidget {
     return avatars;
   }
 
-  double _calculateProgress(String startTime, String endTime) {
-    try {
-      final now = DateTime.now();
-      final startDateTime = DateFormat("HH:mm").parse(startTime);
-      final endDateTime = DateFormat("HH:mm").parse(endTime);
 
-      final start = DateTime(now.year, now.month, now.day, startDateTime.hour, startDateTime.minute);
-      final end = DateTime(now.year, now.month, now.day, endDateTime.hour, endDateTime.minute);
-
-      if (now.isBefore(start)) return 0;
-      if (now.isAfter(end)) return 1;
-
-      final elapsed = now.difference(start).inSeconds;
-      final totalDuration = end.difference(start).inSeconds;
-
-      return elapsed / totalDuration;
-    } catch (e) {
-      return 0;
-    }
-  }
 
   Widget _buildCard({
     required String title,
@@ -117,84 +102,101 @@ class CardSlider extends StatelessWidget {
     required String endTime,
     required List<String> avatars, // Base64-encoded strings
     required Color color,
+    required BuildContext context,
+    required String taskId,
+    required double progress,
   }) {
-    final progress = _calculateProgress(startTime, endTime);
 
-    return Container(
-      width: 300,
-      height: 500,
-      margin: const EdgeInsets.only(right: 15),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TaskDetailPage(
+              taskId: taskId,
+              title: title,
+              subtitle: subtitle,
+              avatars: avatars,
+              progress: progress,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        width: 300,
+        height: 500,
+        margin: const EdgeInsets.only(right: 15),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 3),
+            Text(
+              subtitle,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 14,
+              ),
+            ),
+            SizedBox(height: 13),
+            Row(
+              children: avatars.map((base64Image) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 5.0),
+                  child: CircleAvatar(
+                    radius: 20,
+                    backgroundImage: base64Image.isNotEmpty
+                        ? MemoryImage(Base64Decoder().convert(base64Image))
+                        : null,
+                    child: base64Image.isEmpty
+                        ? Icon(Icons.person, color: Colors.white)
+                        : null,
+                  ),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Progress",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  "${(progress * 100).toStringAsFixed(0)}%",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.white.withOpacity(0.5),
               color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
             ),
-          ),
-          SizedBox(height: 3),
-          Text(
-            subtitle,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 14,
-            ),
-          ),
-          SizedBox(height: 13),
-          Row(
-            children: avatars.map((base64Image) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 5.0),
-                child: CircleAvatar(
-                  radius: 20,
-                  backgroundImage: base64Image.isNotEmpty
-                      ? MemoryImage(Base64Decoder().convert(base64Image))
-                      : null,
-                  child: base64Image.isEmpty
-                      ? Icon(Icons.person, color: Colors.white)
-                      : null,
-                ),
-              );
-            }).toList(),
-          ),
-          SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Progress",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
-              Text(
-                "${(progress * 100).toStringAsFixed(0)}%",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Colors.white.withOpacity(0.5),
-            color: Colors.white,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
-

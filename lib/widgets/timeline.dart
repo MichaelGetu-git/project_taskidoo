@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 
-import 'package:project_taskidoo/widgets/taskpage.dart'; // For Base64Decoder
-
 class TimelinePage extends StatefulWidget {
   final DateTime selectedDate;
 
-  TimelinePage({required this.selectedDate, Key? key}) : super(key:key);
+  TimelinePage({required this.selectedDate, Key? key}) : super(key: key);
 
   @override
   _TimelinePageState createState() => _TimelinePageState();
@@ -17,7 +15,6 @@ class TimelinePage extends StatefulWidget {
 class _TimelinePageState extends State<TimelinePage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  // To store events fetched from Firebase
   List<Event> events = [];
 
   @override
@@ -26,50 +23,39 @@ class _TimelinePageState extends State<TimelinePage> {
     _fetchTasks();
   }
 
-  // Function to fetch tasks from Firebase
   Future<void> _fetchTasks() async {
     try {
-      // Convert the selectedDate string to DateTime
-      DateTime selectedDate = widget.selectedDate; // No need to convert it again
-      print("Converted selectedDate: ${selectedDate.toString()}");
-
-      // Get data from Firebase Firestore
       final querySnapshot = await _firestore.collection('tasks').get();
-
       final List<Event> loadedEvents = [];
+      final currentUserId = _auth.currentUser?.uid;
+
       for (var doc in querySnapshot.docs) {
         final data = doc.data();
-
-        // Check if the 'date' field is a Timestamp or a String
         dynamic taskDate = data['date'];
 
         if (taskDate is Timestamp) {
-          taskDate = taskDate.toDate(); // Convert Timestamp to DateTime
+          taskDate = taskDate.toDate();
         } else if (taskDate is String) {
-          taskDate = DateTime.parse(taskDate); // Convert String to DateTime
+          taskDate = DateTime.parse(taskDate);
         }
-        final currentUserId = _auth.currentUser?.uid;
 
-        // Check if the task's date matches the selected date
-        if (_isSameDay(taskDate, selectedDate) && currentUserId != null && data['selectedMembers'].contains(currentUserId)) {
-          // Fetch avatars for selected members
-          final List<String> avatars = await _fetchAvatars(List<String>.from(data['selectedMembers']));
+        if (_isSameDay(taskDate, widget.selectedDate) &&
+            currentUserId != null &&
+            data['selectedMembers'].contains(currentUserId)) {
+          final List<String> avatars =
+          await _fetchAvatars(List<String>.from(data['selectedMembers']));
 
-          // Convert Firebase data to Event object
           loadedEvents.add(Event(
             time: data['startTime'],
             title: data['taskName'],
             date: taskDate,
             avatars: avatars,
             duration: "${data['startTime']} - ${data['endTime']}",
-            color: Colors.blue[100]!, // You can use any logic for color here
+            color: _getEventColor(loadedEvents.length),
           ));
-        } else {
-          print("no tasks");
         }
       }
 
-      // Update the state to reflect the fetched data
       setState(() {
         events = loadedEvents;
       });
@@ -78,33 +64,33 @@ class _TimelinePageState extends State<TimelinePage> {
     }
   }
 
-  // Function to check if two DateTime objects represent the same day
   bool _isSameDay(DateTime date1, DateTime date2) {
-    // Normalize both dates to midnight to ignore the time part
-    date1 = DateTime(date1.year, date1.month, date1.day); // Normalize to start of the day
-    date2 = DateTime(date2.year, date2.month, date2.day); // Normalize to start of the day
+    date1 = DateTime(date1.year, date1.month, date1.day);
+    date2 = DateTime(date2.year, date2.month, date2.day);
     return date1.isAtSameMomentAs(date2);
   }
 
-  // Function to fetch avatars based on user IDs
   Future<List<String>> _fetchAvatars(List<String> userIds) async {
     List<String> avatars = [];
-
     for (String userId in userIds) {
       try {
-        final userDoc = await FirebaseFirestore.instance.collection("users").doc(userId).get();
+        final userDoc =
+        await _firestore.collection("users").doc(userId).get();
         if (userDoc.exists) {
           final userData = userDoc.data() as Map<String, dynamic>;
-          final avatar = userData['profileImageBase64'] ?? ""; // Assuming the avatar is stored in base64 format
+          final avatar = userData['profileImageBase64'] ?? "";
           avatars.add(avatar);
         }
       } catch (e) {
-        // Handle error (e.g., user not found)
-        avatars.add(""); // Add empty string for missing users
+        avatars.add("");
       }
     }
-
     return avatars;
+  }
+
+  Color _getEventColor(int index) {
+    const colors = [Colors.blue, Colors.orange, Colors.green, Colors.purple];
+    return colors[index % colors.length].withOpacity(0.8);
   }
 
   @override
@@ -114,123 +100,95 @@ class _TimelinePageState extends State<TimelinePage> {
       itemCount: events.length,
       itemBuilder: (context, index) {
         final event = events[index];
-
-        // Calculate offset based on time
-        final offset = _calculateOffset(event.time);
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Time Column
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: Column(
-                children: [
-                  Text(
-                    event.time,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Time
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: Text(
+                  event.time,
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87),
+                ),
               ),
-            ),
-            // Event Details Column
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.only(
-                  top: 8.0,
-                  bottom: 8.0,
-                  left: offset, // Apply dynamic offset here
-                ),
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: event.color,
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Event Title
-                    Text(
-                      event.title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+              // Event Details
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: event.color,
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title
+                      Text(
+                        event.title,
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
                       ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    // Participants Row
-                    Row(
-                      children: [
-                        ...event.avatars.take(3).map((avatar) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 4.0),
-                            child: CircleAvatar(
-                              radius: 16,
-                              backgroundImage: avatar.isNotEmpty
-                                  ? MemoryImage(Base64Decoder().convert(avatar))
-                                  : null,
-                              child: avatar.isEmpty
-                                  ? Icon(Icons.person, color: Colors.white) // Fallback icon
-                                  : null,
-                            ),
-                          );
-                        }),
-                        if (event.avatars.length > 3)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 4.0),
-                            child: CircleAvatar(
+                      const SizedBox(height: 8.0),
+                      // Avatars
+                      Row(
+                        children: [
+                          ...event.avatars.take(3).map((avatar) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 4.0),
+                              child: CircleAvatar(
+                                radius: 16,
+                                backgroundImage: avatar.isNotEmpty
+                                    ? MemoryImage(
+                                    Base64Decoder().convert(avatar))
+                                    : null,
+                                child: avatar.isEmpty
+                                    ? Icon(Icons.person,
+                                    color: Colors.white)
+                                    : null,
+                              ),
+                            );
+                          }),
+                          if (event.avatars.length > 3)
+                            CircleAvatar(
                               radius: 16,
                               backgroundColor: Colors.grey[300],
                               child: Text(
                                 "+${event.avatars.length - 3}",
-                                style: TextStyle(fontSize: 10),
+                                style: TextStyle(fontSize: 12),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 8.0),
-                    // Duration
-                    Text(
-                      event.duration,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 8.0),
+                      // Duration
+                      Text(
+                        event.duration,
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.grey[700]),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
-  }
-
-  // Function to calculate horizontal offset based on time
-  double _calculateOffset(String time) {
-    final regex = RegExp(r"(\d+):(\d+)(am|pm)"); // Match time like 10:30am
-    final match = regex.firstMatch(time);
-
-    if (match != null) {
-      final hour = int.parse(match.group(1)!);
-      final minute = int.parse(match.group(2)!);
-
-      // Calculate the offset in minutes based on the start of the hour
-      final totalOffset = minute; // The offset is the minute part of the time
-
-      // You can scale this factor (e.g., 2.0 for more spacing)
-      return totalOffset * 2.0; // Offset based on minutes (scale factor: 2.0)
-    }
-    return 0.0; // Default to no offset
   }
 }
 
 class Event {
   final String time;
   final String title;
-  final DateTime date; // Store as DateTime
+  final DateTime date;
   final List<String> avatars;
   final String duration;
   final Color color;
@@ -247,6 +205,8 @@ class Event {
 
 void main() {
   runApp(MaterialApp(
-    home: TaskPage(),
+    home: TimelinePage(
+      selectedDate: DateTime.now(),
+    ),
   ));
 }

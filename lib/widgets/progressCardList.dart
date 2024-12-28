@@ -2,6 +2,7 @@ import 'dart:convert'; // For Base64Decoder
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:project_taskidoo/widgets/taskdetailpage.dart';
 
 class Progresscardlist extends StatelessWidget {
   final String taskCollection = "tasks"; // Replace with your Firebase collection name
@@ -63,7 +64,10 @@ class Progresscardlist extends StatelessWidget {
                       startTime: taskData['startTime'] ?? "00:00",
                       endTime: endTime,
                       taskDate: taskData['date'],
+                      progress: taskData['progress'] ?? 0.0,
                       avatars: avatars,
+                      taskId: task.id,
+                      context: context
                     );
                   },
                 );
@@ -122,59 +126,35 @@ class Progresscardlist extends StatelessWidget {
     }
   }
 
-  double _calculateProgress(String startTime, String endTime, dynamic taskDate) {
-    try {
-      final now = DateTime.now();
-
-      // Check if the task date matches today's date
-      DateTime taskDateTime;
-      if (taskDate is String) {
-        taskDateTime = DateFormat("yyyy-MM-dd").parse(taskDate);
-      } else if (taskDate is Timestamp) {
-        taskDateTime = taskDate.toDate();
-      } else {
-        return 0;
-      }
-
-      final today = DateTime(now.year, now.month, now.day);
-      if (taskDateTime.year != today.year ||
-          taskDateTime.month != today.month ||
-          taskDateTime.day != today.day) {
-        return 0;
-      }
-
-      // Parse start and end times
-      final startDateTime = DateFormat("HH:mm").parse(startTime);
-      final endDateTime = DateFormat("HH:mm").parse(endTime);
-
-      final start = DateTime(now.year, now.month, now.day, startDateTime.hour, startDateTime.minute);
-      final end = DateTime(now.year, now.month, now.day, endDateTime.hour, endDateTime.minute);
-
-      // If the current time is outside the task time range
-      if (now.isBefore(start)) return 0;
-      if (now.isAfter(end)) return 1;
-
-      // Calculate progress as a percentage
-      final elapsed = now.difference(start).inSeconds;
-      final totalDuration = end.difference(start).inSeconds;
-
-      return elapsed / totalDuration;
-    } catch (e) {
-      return 0;
-    }
-  }
-
   Widget _buildListTile({
     required String title,
+    required String taskId,
     required String subtitle,
     required String startTime,
     required String endTime,
+    required double progress,
     required dynamic taskDate,
     required List<String> avatars,
+    required BuildContext context,
   }) {
-    final progress = _calculateProgress(startTime, endTime, taskDate);
 
-    return Container(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TaskDetailPage(
+              taskId: taskId,
+              title: title,
+              subtitle: subtitle,
+              avatars: avatars,
+              progress: progress,
+            ),
+          ),
+        );
+      },
+
+      child: Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -220,20 +200,21 @@ class Progresscardlist extends StatelessWidget {
                 width: 50,
                 height: 50,
                 child: CircularProgressIndicator(
-                  value: progress.clamp(0.0,1.0),
+                  value: progress.clamp(0.0,100.0),
                   strokeWidth: 6,
                   backgroundColor: Colors.grey[300],
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                 ),
               ),
               Text(
-                "${(progress)}%", // Converts progress to percentage
+                "${(progress*100)}%", // Converts progress to percentage
                 style: TextStyle(fontSize: 12),
               ),
             ],
           ),
         ],
       ),
+    ),
     );
   }
 }
