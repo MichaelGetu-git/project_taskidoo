@@ -132,13 +132,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   SizedBox(height: 16),  // Add spacing between the title/arrow and the list
                   Expanded(
-                    child: ProgressCardList(
-                      tasks: [
-                        Task("Productivity Mobile App", "Create Detail Booking", 60, "2 min ago"),
-                        Task("Banking Mobile App", "Revision Home Page", 70, "5 min ago"),
-                        Task("Online Course", "Working On Landing Page", 80, "7 min ago"),
-                      ],
-                    ),
+                    child: Progresscardlist(),
                   ),
                 ],
               ),

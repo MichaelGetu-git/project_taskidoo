@@ -11,14 +11,15 @@ import 'package:project_taskidoo/pages/home/login.dart';
 import 'package:project_taskidoo/pages/task/task_creation_page.dart';
 import 'package:project_taskidoo/pages/team/profilecreationpage.dart';
 import 'package:project_taskidoo/pages/team/team_management_page.dart';
+import 'package:project_taskidoo/widgets/addproject.dart';
 import 'package:project_taskidoo/widgets/addtask.dart';
 import 'package:project_taskidoo/widgets/cardSlider.dart';
 import 'package:project_taskidoo/widgets/createteam.dart';
 import 'package:project_taskidoo/widgets/monthlytask.dart';
 import 'package:project_taskidoo/widgets/progressScreen.dart';
+import 'package:project_taskidoo/widgets/projectpage.dart';
 import 'package:project_taskidoo/widgets/settings.dart';
 import 'package:project_taskidoo/widgets/taskpage.dart';
-import 'package:project_taskidoo/widgets/teamchat.dart';
 
 
 class Taskidoo extends StatelessWidget {
@@ -44,8 +45,9 @@ class Taskidoo extends StatelessWidget {
         '/monthly-task': (context) => TaskPage2(),
         '/add-task': (context) =>AddTaskScreen(),
         '/create-team': (context) => CreateteamScreen(),
-        '/team-chat': (context) => TeamChatScreen(),
         '/settings-page':(context) => SettingsScreen(),
+        '/create-project': (context) => CreateProjectScreen(),
+        '/project-page': (context) => ProjectPage(),
       },
       theme: ThemeData(
         appBarTheme: const AppBarTheme(

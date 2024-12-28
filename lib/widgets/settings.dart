@@ -1,20 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const Settings());
-}
-
-class Settings extends StatelessWidget {
-  const Settings({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const SettingsScreen(),
-    );
-  }
-}
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -24,9 +10,64 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool permissionEnabled = true;
-  bool pushNotificationEnabled = false;
   bool darkModeEnabled = false;
+  bool pushNotificationEnabled = false;
+  bool permissionEnabled = false;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings(); // Load settings from Firestore when the screen initializes
+  }
+
+  // Load settings from Firestore
+  Future<void> _loadSettings() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        DocumentSnapshot settingsDoc = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('settings')
+            .doc('preferences')
+            .get();
+
+        if (settingsDoc.exists) {
+          setState(() {
+            darkModeEnabled = settingsDoc['darkModeEnabled'] ?? false;
+            pushNotificationEnabled = settingsDoc['pushNotificationEnabled'] ?? false;
+            permissionEnabled = settingsDoc['permissionEnabled'] ?? false;
+          });
+        }
+      }
+    } catch (e) {
+      print("Error loading settings: $e");
+    }
+  }
+
+  // Save settings to Firestore
+  Future<void> _saveSettings() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('settings')
+            .doc('preferences')
+            .set({
+          'darkModeEnabled': darkModeEnabled,
+          'pushNotificationEnabled': pushNotificationEnabled,
+          'permissionEnabled': permissionEnabled,
+        });
+      }
+    } catch (e) {
+      print("Error saving settings: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,30 +89,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         children: [
           _buildSwitchTile(
-            title: "Permission",
-            value: permissionEnabled,
-            onChanged: (value) {
-              setState(() {
-                permissionEnabled = value;
-              });
-            },
-          ),
-          _buildSwitchTile(
-            title: "Push Notification",
-            value: pushNotificationEnabled,
-            onChanged: (value) {
-              setState(() {
-                pushNotificationEnabled = value;
-              });
-            },
-          ),
-          _buildSwitchTile(
-            title: "Dark Mood",
+            title: "Dark Mode",
             value: darkModeEnabled,
             onChanged: (value) {
               setState(() {
                 darkModeEnabled = value;
               });
+              _saveSettings(); // Save updated settings to Firebase
+            },
+          ),
+          const SizedBox(height: 16),
+          _buildSwitchTile(
+            title: "Push Notifications",
+            value: pushNotificationEnabled,
+            onChanged: (value) {
+              setState(() {
+                pushNotificationEnabled = value;
+              });
+              _saveSettings(); // Save updated settings to Firebase
+            },
+          ),
+          const SizedBox(height: 16),
+          _buildSwitchTile(
+            title: "Permissions",
+            value: permissionEnabled,
+            onChanged: (value) {
+              setState(() {
+                permissionEnabled = value;
+              });
+              _saveSettings(); // Save updated settings to Firebase
             },
           ),
           const SizedBox(height: 16),

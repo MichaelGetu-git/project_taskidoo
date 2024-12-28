@@ -26,13 +26,7 @@ class ProgressScreen extends StatelessWidget {
         foregroundColor: Colors.black,
         elevation: 1,
       ),
-      body: ProgressCardList(
-        tasks: [
-          Task("Productivity Mobile App", "Create Detail Booking", 60, "2 min ago"),
-          Task("Banking Mobile App", "Revision Home Page", 70, "5 min ago"),
-          Task("Online Course", "Working On Landing Page", 80, "7 min ago"),
-        ],
-      ),
+      body: Progresscardlist(),
     );
   }
 }

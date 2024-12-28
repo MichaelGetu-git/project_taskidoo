@@ -104,7 +104,7 @@ class _NavbarState extends State<Navbar> {
                             padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
                           ),
                           onPressed: () {
-                            Navigator.pushNamed(context, '/task-page');
+                            Navigator.pushNamed(context, '/create-project');
                           },
                           child: Align(
                             alignment: Alignment.centerLeft,
@@ -206,6 +206,7 @@ class _NavbarState extends State<Navbar> {
                   color: Colors.blue,
                   onPressed: () {
                     widget.onTabChanged(1);
+                    Navigator.pushNamed(context, '/task-page');
                   },
                 ),
                 IconButton(
@@ -217,11 +218,11 @@ class _NavbarState extends State<Navbar> {
                     onPressed: _toggleMenu,
                   ),
                 IconButton(
-                  icon: Icon(Icons.message),
+                  icon: Icon(Icons.task_sharp),
                   color: Colors.blue,
                   onPressed: () {
                     widget.onTabChanged(2);
-                    Navigator.pushNamed(context, '/team-chat');
+                    Navigator.pushNamed(context, '/project-page');
                   },
                 ),
                 IconButton(

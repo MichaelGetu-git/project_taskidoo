@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
@@ -15,7 +16,7 @@ class TimelinePage extends StatefulWidget {
 
 class _TimelinePageState extends State<TimelinePage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   // To store events fetched from Firebase
   List<Event> events = [];
 
@@ -47,9 +48,10 @@ class _TimelinePageState extends State<TimelinePage> {
         } else if (taskDate is String) {
           taskDate = DateTime.parse(taskDate); // Convert String to DateTime
         }
+        final currentUserId = _auth.currentUser?.uid;
 
         // Check if the task's date matches the selected date
-        if (_isSameDay(taskDate, selectedDate)) {
+        if (_isSameDay(taskDate, selectedDate) && currentUserId != null && data['selectedMembers'].contains(currentUserId)) {
           // Fetch avatars for selected members
           final List<String> avatars = await _fetchAvatars(List<String>.from(data['selectedMembers']));
 
@@ -76,18 +78,13 @@ class _TimelinePageState extends State<TimelinePage> {
     }
   }
 
-
-  // Function to check if two DateTime objects represent the same day
   // Function to check if two DateTime objects represent the same day
   bool _isSameDay(DateTime date1, DateTime date2) {
     // Normalize both dates to midnight to ignore the time part
-    print(date1);
-    print(date2);
-    date1 = DateTime( date1.day);
-    date2 = DateTime(date2.day);
+    date1 = DateTime(date1.year, date1.month, date1.day); // Normalize to start of the day
+    date2 = DateTime(date2.year, date2.month, date2.day); // Normalize to start of the day
     return date1.isAtSameMomentAs(date2);
   }
-
 
   // Function to fetch avatars based on user IDs
   Future<List<String>> _fetchAvatars(List<String> userIds) async {
@@ -220,8 +217,11 @@ class _TimelinePageState extends State<TimelinePage> {
       final hour = int.parse(match.group(1)!);
       final minute = int.parse(match.group(2)!);
 
+      // Calculate the offset in minutes based on the start of the hour
+      final totalOffset = minute; // The offset is the minute part of the time
+
       // You can scale this factor (e.g., 2.0 for more spacing)
-      return minute * 2.0; // Offset based on minutes (scale factor: 2.0)
+      return totalOffset * 2.0; // Offset based on minutes (scale factor: 2.0)
     }
     return 0.0; // Default to no offset
   }

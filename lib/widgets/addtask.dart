@@ -85,12 +85,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to save task: $e')));
     }
   }
-
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {});
-    });
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -105,178 +101,182 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Task Name',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _taskNameController, // Connect task name controller
-              decoration: InputDecoration(
-                hintText: 'Enter task name',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                  borderSide: BorderSide(color: Colors.white60, width: 1.0),
-                ),
+      body: SingleChildScrollView(  // Wrap the entire content in a scrollable view
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Task Name',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Task Subtitle',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _taskSubtitleController, // Connect subtitle controller
-              decoration: InputDecoration(
-                hintText: 'Enter task subtitle',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                  borderSide: BorderSide(color: Colors.white60, width: 1.0),
-                ),
-              ),
-            ),
-            SizedBox(height: 5),
-            TeamMemberWidget(onSelectionChanged: _onTeamMembersSelected),  // Pass the callback to TeamMemberWidget
-            Text(
-              'Date',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            TextField(
-              controller: _dateController,
-              readOnly: true,
-              decoration: InputDecoration(
-                hintText: 'Select a date',
-                labelText: 'Date',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                  borderSide: BorderSide(color: Colors.white60, width: 1.0),
-                ),
-                suffixIcon: Icon(Icons.calendar_today),
-              ),
-              onTap: () => _selectDate(context),
-            ),
-            SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Start Time',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8),
-                      TextField(
-                        controller: _startTimeController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          hintText: 'Select start time',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                            borderSide: BorderSide(color: Colors.white60, width: 1.0),
-                          ),
-                          suffixIcon: Icon(Icons.access_time),
-                        ),
-                        onTap: () => _selectTime(context, _startTimeController),
-                      ),
-                    ],
+              SizedBox(height: 10),
+              TextField(
+                controller: _taskNameController, // Connect task name controller
+                decoration: InputDecoration(
+                  hintText: 'Enter task name',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: BorderSide(color: Colors.white60, width: 1.0),
                   ),
                 ),
-                SizedBox(width: 6),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'End Time',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8),
-                      TextField(
-                        controller: _endTimeController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          hintText: 'Select end time',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                            borderSide: BorderSide(color: Colors.white60, width: 1.0),
-                          ),
-                          suffixIcon: Icon(Icons.access_time),
-                        ),
-                        onTap: () => _selectTime(context, _endTimeController),
-                      ),
-                    ],
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Task Subtitle',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: _taskSubtitleController, // Connect subtitle controller
+                decoration: InputDecoration(
+                  hintText: 'Enter task subtitle',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: BorderSide(color: Colors.white60, width: 1.0),
                   ),
                 ),
-              ],
-            ),
-            Text(
-              'Board',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ChoiceChip(
-                  label: Text('Urgent'),
-                  selected: _selectedBoard == 'Urgent',
-                  onSelected: (value) {
-                    setState(() {
-                      _selectedBoard = 'Urgent';
-                    });
-                  },
+              ),
+              SizedBox(height: 5),
+              TeamMemberWidget(onSelectionChanged: _onTeamMembersSelected),  // Pass the callback to TeamMemberWidget
+              Text(
+                'Date',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              TextField(
+                controller: _dateController,
+                readOnly: true,
+                decoration: InputDecoration(
+                  hintText: 'Select a date',
+                  labelText: 'Date',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: BorderSide(color: Colors.white60, width: 1.0),
+                  ),
+                  suffixIcon: Icon(Icons.calendar_today),
                 ),
-                SizedBox(width: 8),
-                ChoiceChip(
-                  label: Text('Running'),
-                  selected: _selectedBoard == 'Running',
-                  onSelected: (value) {
-                    setState(() {
-                      _selectedBoard = 'Running';
-                    });
-                  },
-                ),
-                SizedBox(width: 8),
-                ChoiceChip(
-                  label: Text('Ongoing'),
-                  selected: _selectedBoard == 'Ongoing',
-                  onSelected: (value) {
-                    setState(() {
-                      _selectedBoard = 'Ongoing';
-                    });
-                  },
-                ),
-              ],
-            ),
-            Spacer(),
-            Center(
-              child: SizedBox(
-                width: 300,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(double.infinity, 50),
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                onTap: () => _selectDate(context),
+              ),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Start Time',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8),
+                        TextField(
+                          controller: _startTimeController,
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            hintText: 'Select start time',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                              borderSide: BorderSide(color: Colors.white60, width: 1.0),
+                            ),
+                            suffixIcon: Icon(Icons.access_time),
+                          ),
+                          onTap: () => _selectTime(context, _startTimeController),
+                        ),
+                      ],
                     ),
                   ),
-                  onPressed: _saveTask,
-                  child: Text('Save'),
+                  SizedBox(width: 6),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'End Time',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8),
+                        TextField(
+                          controller: _endTimeController,
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            hintText: 'Select end time',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                              borderSide: BorderSide(color: Colors.white60, width: 1.0),
+                            ),
+                            suffixIcon: Icon(Icons.access_time),
+                          ),
+                          onTap: () => _selectTime(context, _endTimeController),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                'Board',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ChoiceChip(
+                    label: Text('Urgent'),
+                    selected: _selectedBoard == 'Urgent',
+                    onSelected: (value) {
+                      setState(() {
+                        _selectedBoard = 'Urgent';
+                      });
+                    },
+                  ),
+                  SizedBox(width: 8),
+                  ChoiceChip(
+                    label: Text('Running'),
+                    selected: _selectedBoard == 'Running',
+                    onSelected: (value) {
+                      setState(() {
+                        _selectedBoard = 'Running';
+                      });
+                    },
+                  ),
+                  SizedBox(width: 8),
+                  ChoiceChip(
+                    label: Text('Ongoing'),
+                    selected: _selectedBoard == 'Ongoing',
+                    onSelected: (value) {
+                      setState(() {
+                        _selectedBoard = 'Ongoing';
+                      });
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 16), // Adjust spacing for better layout
+              Center(
+                child: SizedBox(
+                  width: 300,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(double.infinity, 50),
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: _saveTask,
+                    child: Text('Save'),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+
+
 }

@@ -2,6 +2,7 @@ import 'dart:convert'; // For Base64Decoder
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CardSlider extends StatelessWidget {
   final String taskCollection = "tasks"; // Replace with your Firebase collection name
@@ -24,10 +25,15 @@ class CardSlider extends StatelessWidget {
             }
 
             final tasks = taskSnapshot.data!.docs;
+            final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
 
             return ListView(
               scrollDirection: Axis.horizontal,
-              children: tasks.map((task) {
+              children: tasks.where((task) {
+                final taskData = task.data() as Map<String, dynamic>;
+                final selectedMembers = List<String>.from(taskData['selectedMembers'] ?? []);
+                return selectedMembers.contains(currentUserUid); // Only include tasks for the current user
+              }).map((task) {
                 final taskData = task.data() as Map<String, dynamic>;
                 final selectedMembers = List<String>.from(taskData['selectedMembers'] ?? []);
 
@@ -191,3 +197,4 @@ class CardSlider extends StatelessWidget {
     );
   }
 }
+
