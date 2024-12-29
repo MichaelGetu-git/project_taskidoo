@@ -9,7 +9,6 @@ class CreateteamScreen extends StatefulWidget {
   @override
   _CreateteamScreenState createState() => _CreateteamScreenState();
 }
-
 class _CreateteamScreenState extends State<CreateteamScreen> {
   final TextEditingController _teamNameController = TextEditingController();
   String _teamType = 'Public'; // Default type
@@ -80,11 +79,20 @@ class _CreateteamScreenState extends State<CreateteamScreen> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Container(
+              child: Center(
+                child: Image.asset(
+                  'assets/images/logo6.png',
+                  height: 200,
+                  width: 200,
+                ),
+              ),
+            ),
             Text(
               'Team Name',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -105,32 +113,35 @@ class _CreateteamScreenState extends State<CreateteamScreen> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore.collection('users').snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Center(child: CircularProgressIndicator());
-                  }
+            StreamBuilder<QuerySnapshot>(
+              stream: _firestore.collection('users').snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
 
-                  final users = snapshot.data!.docs;
+                final users = snapshot.data!.docs;
 
-                  return ListView.builder(
-                    itemCount: users.length,
-                    itemBuilder: (context, index) {
-                      final user = users[index];
-                      final userId = user.id;
-                      final userName = user['name'];
-                      final userProfileBase64 = user['profileImageBase64'];
+                return ListView.builder(
+                  shrinkWrap: true, // Important for ListView inside a scrollable widget
+                  physics: NeverScrollableScrollPhysics(), // Disable internal scrolling of ListView
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    final user = users[index];
+                    final userId = user.id;
+                    final userName = user['name'];
+                    final userProfileBase64 = user['profileImageBase64'];
 
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: userProfileBase64 != null && userProfileBase64.isNotEmpty
-                              ? MemoryImage(_decodeBase64ToImage(userProfileBase64)!)
-                              : AssetImage('assets/default_profile_image.png') as ImageProvider, // Default image if no profile image
-                        ),
-                        title: Text(user['name']),
-                        trailing: Checkbox(
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: userProfileBase64 != null && userProfileBase64.isNotEmpty
+                            ? MemoryImage(_decodeBase64ToImage(userProfileBase64)!)
+                            : AssetImage('assets/default_profile_image.png') as ImageProvider, // Default image if no profile image
+                      ),
+                      title: Text(user['name']),
+                      trailing: Transform.scale(
+                        scale: 1.3,
+                        child: Checkbox(
                           value: _selectedMembers.contains(userId),
                           onChanged: (isChecked) {
                             setState(() {
@@ -141,12 +152,15 @@ class _CreateteamScreenState extends State<CreateteamScreen> {
                               }
                             });
                           },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0), // Apply rounded corners
+                          ),
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
+                      ),
+                    );
+                  },
+                );
+              },
             ),
             SizedBox(height: 20),
             Text(

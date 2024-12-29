@@ -115,26 +115,27 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
         title: Text('Profile Creation'),
         centerTitle: true,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             GestureDetector(
               onTap: _pickImage,
               child: _profileImage != null
                   ? CircleAvatar(
-                radius: 110,
+                radius: 95,
                 backgroundImage: FileImage(_profileImage!),
                 backgroundColor: Colors.grey[200],
               )
                   : CircleAvatar(
-                radius: 100,
+                radius: 95,
                 backgroundColor: Colors.grey[850],
                 child: Icon(
                   Icons.person,
                   size: 80,
-                  color: Colors.grey[700],
+                  color: Colors.grey,
                 ),
               ),
             ),
@@ -154,7 +155,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 40),
+                  SizedBox(height: 20),
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -165,7 +166,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 40),
+                  SizedBox(height: 20),
                   TextField(
                     controller: _passwordController,
                     obscureText: true, // Mask password input
@@ -177,7 +178,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 110),
+                  SizedBox(height: 15,),
                   Container(
                     width: double.infinity,
                     child: ElevatedButton(

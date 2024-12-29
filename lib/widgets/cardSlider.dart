@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:project_taskidoo/widgets/taskdetailpage.dart';
+import 'package:project_taskidoo/pages/taskdetailpage.dart';
 
 class CardSlider extends StatelessWidget {
   final String taskCollection = "tasks"; // Replace with your Firebase collection name
@@ -28,13 +28,33 @@ class CardSlider extends StatelessWidget {
             final tasks = taskSnapshot.data!.docs;
             final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
 
+            final now = DateTime.now().subtract(Duration(days: 1)); // Include today's tasks
+
+            final filteredTasks = tasks.where((task) {
+              final taskData = task.data() as Map<String, dynamic>;
+              final selectedMembers = List<String>.from(taskData['selectedMembers'] ?? []);
+              final taskDate = taskData['date'] is String
+                  ? DateTime.parse(taskData['date'])
+                  : taskData['date']?.toDate();  // Handle case for Timestamp if present
+
+
+              // Include tasks that are for today or in the future and belong to the user
+              return taskDate != null && taskDate.isAfter(now) && selectedMembers.contains(currentUserUid);
+            }).toList();
+
+            final cardColors = [
+              Colors.blue,
+              Colors.green,
+              Colors.orange,
+              Colors.purple,
+              Colors.red,
+            ];
+
             return ListView(
               scrollDirection: Axis.horizontal,
-              children: tasks.where((task) {
-                final taskData = task.data() as Map<String, dynamic>;
-                final selectedMembers = List<String>.from(taskData['selectedMembers'] ?? []);
-                return selectedMembers.contains(currentUserUid); // Only include tasks for the current user
-              }).map((task) {
+              children: filteredTasks.asMap().entries.map((entry) {
+                final index = entry.key;
+                final task = entry.value;
                 final taskData = task.data() as Map<String, dynamic>;
                 final selectedMembers = List<String>.from(taskData['selectedMembers'] ?? []);
 
@@ -53,20 +73,22 @@ class CardSlider extends StatelessWidget {
 
                     final avatars = avatarSnapshot.data ?? [];
                     return _buildCard(
+                      taskId: task.id,
                       title: taskData['taskName'] ?? "Unknown Task",
                       subtitle: taskData['taskSubtitle'] ?? "No subtitle",
+                      avatars: avatars,
+                      progress: taskData['progress'] ?? 0.0,
+                      date: taskData['date'] ?? "Unknown Date",
                       startTime: taskData['startTime'] ?? "00:00",
                       endTime: taskData['endTime'] ?? "00:00",
-                      progress: taskData['progress'] ?? 0.0,
-                      avatars: avatars,
-                      color: Colors.blue, // Customize based on task priority
+                      color: cardColors[index % cardColors.length], // Alternate colors
                       context: context,
-                      taskId: task.id,
                     );
                   },
                 );
               }).toList(),
             );
+
           },
         ),
       ),
@@ -105,6 +127,7 @@ class CardSlider extends StatelessWidget {
     required BuildContext context,
     required String taskId,
     required double progress,
+    required String date
   }) {
 
     return GestureDetector(
@@ -118,6 +141,9 @@ class CardSlider extends StatelessWidget {
               subtitle: subtitle,
               avatars: avatars,
               progress: progress,
+              date: date,
+              startTime: startTime,
+              endTime: endTime,
             ),
           ),
         );

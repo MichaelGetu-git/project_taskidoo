@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -13,11 +15,60 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
+  final User? user = FirebaseAuth.instance.currentUser; // Get the logged-in user
+  String? profileImageBase64;
+
 
   void _onTabChanged(int index) {
     setState(() {
       _currentIndex = index;
     });
+  }
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfilePicture();
+  }
+
+  Future<void> _fetchProfilePicture() async {
+    if (user != null) {
+      try {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .get();
+
+        if (doc.exists) {
+          setState(() {
+            profileImageBase64 = doc.data()?['profileImageBase64'];
+          });
+        }
+      } catch (e) {
+        print('Error fetching profile picture: $e');
+      }
+    }
+  }
+
+  // Convert Base64 string to an image widget
+  Widget _buildProfileImage() {
+    return GestureDetector(
+
+      onTap: () {Navigator.pushNamed(context,'/profile-page');},
+        child: ClipOval(
+
+          child: profileImageBase64 != null ?
+          Image.memory(
+            base64Decode(profileImageBase64!),
+            height: 45,
+            width: 45,
+            fit: BoxFit.cover,
+          ) : const Icon(
+            Icons.person,
+            size: 25,
+            color: Colors.grey,
+          ),
+        ),
+    );
   }
 
   final List<Widget> _pages = [
@@ -45,17 +96,8 @@ class _HomePageState extends State<HomePage> {
         iconTheme: const IconThemeData(color: Colors.blue),
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: IconButton(
-              icon: Icon(
-                Icons.exit_to_app,
-                color: Colors.blue,
-              ),
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacementNamed(context, '/login');
-              },
-            ),
+            padding: EdgeInsets.only(right: 25.0),
+            child: _buildProfileImage(),
           ),
         ],
       ),
@@ -74,7 +116,7 @@ class _HomePageState extends State<HomePage> {
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: Text(
-                  'Taskidoo Menu',
+                  'Menu',
                   style: TextStyle(
                     fontSize: 24,
                     color: Colors.white,
@@ -103,19 +145,19 @@ class _HomePageState extends State<HomePage> {
             ),
             Divider(),
             ListTile(
-              leading: Icon(Icons.settings, color: Colors.grey),
-              title: Text('Settings', style: TextStyle(fontSize: 18)),
+              leading: Icon(Icons.person_2_sharp, color: Colors.grey),
+              title: Text('Profile', style: TextStyle(fontSize: 18)),
               onTap: () {
-                Navigator.pushNamed(context, '/settings-page');
-                print('Settings clicked');
+                Navigator.pushNamed(context, '/profile-page');
+                print('profile clicked');
               },
             ),
             ListTile(
-              leading: Icon(Icons.info, color: Colors.purple),
-              title: Text('About', style: TextStyle(fontSize: 18)),
-              onTap: () {
-                Navigator.pop(context);
-                print('About clicked');
+              leading: Icon(Icons.logout, color: Colors.purple),
+              title: Text('Logout', style: TextStyle(fontSize: 18)),
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushReplacementNamed(context, '/login');
               },
             ),
           ],
@@ -129,7 +171,7 @@ class _HomePageState extends State<HomePage> {
             const Padding(
               padding: EdgeInsets.all(20.0),
               child: Text(
-                "Let's make a lot of good habits together",
+                "Let's make a lot of good habits together✍️",
                 style: TextStyle(fontSize: 22),
               ),
             ),

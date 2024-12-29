@@ -2,24 +2,24 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:project_taskidoo/pages/home/home_page.dart';
-import 'package:project_taskidoo/pages/home/intro_page.dart';
-import 'package:project_taskidoo/pages/home/intro_page_2.dart';
-import 'package:project_taskidoo/pages/home/intro_page_3.dart';
-import 'package:project_taskidoo/pages/home/intro_page_4.dart';
-import 'package:project_taskidoo/pages/home/login.dart';
+import 'package:project_taskidoo/pages/addproject.dart';
+import 'package:project_taskidoo/pages/addtask.dart';
+import 'package:project_taskidoo/pages/createteam.dart';
+import 'package:project_taskidoo/pages/home_page.dart';
+import 'package:project_taskidoo/pages/intro_page.dart';
+import 'package:project_taskidoo/pages/intro_page_2.dart';
+import 'package:project_taskidoo/pages/intro_page_3.dart';
+import 'package:project_taskidoo/pages/intro_page_4.dart';
+import 'package:project_taskidoo/pages/login.dart';
+import 'package:project_taskidoo/pages/profiledetailpage.dart';
+import 'package:project_taskidoo/pages/progressScreen.dart';
+import 'package:project_taskidoo/pages/projectpage.dart';
 import 'package:project_taskidoo/pages/task/task_creation_page.dart';
 import 'package:project_taskidoo/pages/team/profilecreationpage.dart';
 import 'package:project_taskidoo/pages/team/team_management_page.dart';
-import 'package:project_taskidoo/widgets/addproject.dart';
-import 'package:project_taskidoo/widgets/addtask.dart';
 import 'package:project_taskidoo/widgets/cardSlider.dart';
-import 'package:project_taskidoo/widgets/createteam.dart';
-import 'package:project_taskidoo/widgets/monthlytask.dart';
-import 'package:project_taskidoo/widgets/progressScreen.dart';
-import 'package:project_taskidoo/widgets/projectpage.dart';
-import 'package:project_taskidoo/widgets/settings.dart';
-import 'package:project_taskidoo/widgets/taskpage.dart';
+import 'package:project_taskidoo/pages/monthlytask.dart';
+import 'package:project_taskidoo/pages/taskpage.dart';
 
 
 class Taskidoo extends StatelessWidget {
@@ -45,9 +45,10 @@ class Taskidoo extends StatelessWidget {
         '/monthly-task': (context) => TaskPage2(),
         '/add-task': (context) =>AddTaskScreen(),
         '/create-team': (context) => CreateteamScreen(),
-        '/settings-page':(context) => SettingsScreen(),
         '/create-project': (context) => CreateProjectScreen(),
         '/project-page': (context) => ProjectPage(),
+        '/profile-page': (context) => ProfileDetailWidget(),
+
       },
       theme: ThemeData(
         appBarTheme: const AppBarTheme(

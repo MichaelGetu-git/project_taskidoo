@@ -43,7 +43,7 @@ class _NavbarState extends State<Navbar> {
                   left: 0,
                   right: 0,
                   child: Container(
-                    padding: EdgeInsets.all(20),
+                    padding: EdgeInsets.all(30),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(15),
@@ -60,7 +60,7 @@ class _NavbarState extends State<Navbar> {
                             shape: RoundedRectangleBorder(
                               side: BorderSide(
                                 color: Colors.grey,
-                                width: 1,
+                                width: 0.4,
                               ),
 
                               borderRadius: BorderRadius.circular(18),
@@ -82,8 +82,9 @@ class _NavbarState extends State<Navbar> {
                                 Text(
                                   'Create Task',
                                   style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.black
                                   ),
                                 )
                               ],
@@ -97,7 +98,7 @@ class _NavbarState extends State<Navbar> {
                             shape: RoundedRectangleBorder(
                               side: BorderSide(
                                 color: Colors.grey,
-                                width: 1.0,
+                                width: 0.4,
                               ),
                               borderRadius: BorderRadius.circular(18),
                             ),
@@ -119,7 +120,8 @@ class _NavbarState extends State<Navbar> {
                                   'Create Project',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 20
+                                      fontSize: 16,
+                                      color: Colors.black
                                   ),
                                 )
                               ],
@@ -133,7 +135,7 @@ class _NavbarState extends State<Navbar> {
                             shape: RoundedRectangleBorder(
                               side: BorderSide(
                                 color: Colors.grey,
-                                width: 1.0
+                                width: 0.4
                               ),
                               borderRadius: BorderRadius.circular(18),
                             ),
@@ -155,14 +157,15 @@ class _NavbarState extends State<Navbar> {
                                   'Create Team',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 20
+                                      fontSize: 16,
+                                    color: Colors.black
                                   ),
                                 )
                               ],
                             ),
                           ),
                         ),
-                        SizedBox(height: 100),
+                        SizedBox(height: 50),
                         IconButton(
                           icon: Icon(
                             Icons.close, size: 40, color: Colors.blue,),
@@ -230,7 +233,7 @@ class _NavbarState extends State<Navbar> {
                   color: Colors.blue,
                   onPressed: () {
                     widget.onTabChanged(3);
-                    Navigator.pushNamed(context, '/settings-page');
+                    Navigator.pushNamed(context, '/profile-page');
                   },
                 ),
 

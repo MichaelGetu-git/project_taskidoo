@@ -4,17 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:project_taskidoo/widgets/timeline.dart';
-
-import 'package:flutter/material.dart';
-import 'package:project_taskidoo/widgets/timeline.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class TaskPage2 extends StatefulWidget {
+class ProjectPage extends StatefulWidget {
   @override
-  _TaskPage2State createState() => _TaskPage2State();
+  _ProjectPageState createState() => _ProjectPageState();
 }
 
-class _TaskPage2State extends State<TaskPage2> {
+class _ProjectPageState extends State<ProjectPage> {
   final List<DateTime> dates = List.generate(
     5,
         (index) => DateTime.now().add(Duration(days: index)),
@@ -30,7 +27,7 @@ class _TaskPage2State extends State<TaskPage2> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
-          "Monthly Task",
+          "Monthly Projects",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -51,14 +48,14 @@ class _TaskPage2State extends State<TaskPage2> {
                 IconButton(
                   icon: Icon(Icons.calendar_today_rounded, color: Colors.blue),
                   onPressed: () {
-                    Navigator.pushNamed(context, '/monthly-task');
+                    Navigator.pushNamed(context, '/monthly-projects');
                   },
                 ),
               ],
             ),
             SizedBox(height: 4),
             Text(
-              "15 tasks today",
+              "15 projects today",
               style: TextStyle(color: Colors.grey[600]),
             ),
             SizedBox(height: 16),
@@ -123,11 +120,9 @@ class _TaskPage2State extends State<TaskPage2> {
               ),
             ),
             SizedBox(height: 16),
-            // Task List
+            // Project List
             Expanded(
-              child: CalendarPage(
-
-              ),
+              child: ProjectCalendarPage(),
             ),
           ],
         ),
@@ -150,18 +145,19 @@ extension DateTimeExtension on DateTime {
   }
 }
 
-class CalendarPage extends StatefulWidget {
+
+
+class ProjectCalendarPage extends StatefulWidget {
   @override
-  _CalendarPageState createState() => _CalendarPageState();
+  _ProjectCalendarPageState createState() => _ProjectCalendarPageState();
 }
 
-class _CalendarPageState extends State<CalendarPage> {
+class _ProjectCalendarPageState extends State<ProjectCalendarPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;  // Add FirebaseAuth instance
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-
-  // Store tasks fetched from Firebase
-  final Map<DateTime, List<Map<String, dynamic>>> tasks = {};
+  // Store projects fetched from Firestore
+  final Map<DateTime, List<Map<String, dynamic>>> projects = {};
 
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -169,54 +165,55 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void initState() {
     super.initState();
-    _fetchTasks(); // Fetch tasks on initialization
+    _fetchProjects(); // Fetch projects on initialization
   }
 
-  // Fetch tasks from Firestore based on selected day
-  Future<void> _fetchTasks() async {
+  // Fetch projects from Firestore based on selected day
+  Future<void> _fetchProjects() async {
     try {
-      // Fetch all tasks from Firestore
-      final querySnapshot = await _firestore.collection('tasks').get();
+      // Fetch all projects from Firestore
+      final querySnapshot = await _firestore.collection('projects').get();
 
-      final Map<DateTime, List<Map<String, dynamic>>> loadedTasks = {};
+      final Map<DateTime, List<Map<String, dynamic>>> loadedProjects = {};
 
       final currentUserId = _auth.currentUser?.uid;
 
       for (var doc in querySnapshot.docs) {
         final data = doc.data();
-        dynamic taskDate = data['date'];
+        dynamic startDate = data['startDate'];
 
-        if (taskDate is Timestamp) {
-          taskDate = taskDate.toDate(); // Convert Timestamp to DateTime
-        } else if (taskDate is String) {
-          taskDate = DateTime.parse(taskDate); // Convert String to DateTime
+        if (startDate is String) {
+          startDate = DateTime.parse(startDate); // Convert String to DateTime
         }
 
-        DateTime normalizedDate = _normalizeDate(taskDate);
+        DateTime normalizedDate = _normalizeDate(startDate);
 
-        if (currentUserId != null && data['selectedMembers'].contains(currentUserId)) {
-          if (loadedTasks[normalizedDate] == null) {
-            loadedTasks[normalizedDate] = [];
+        if (currentUserId != null && data['teamMembers'].contains(currentUserId)) {
+          if (loadedProjects[normalizedDate] == null) {
+            loadedProjects[normalizedDate] = [];
           }
 
-          // Fetch avatars for the participants
-          final List<String> avatars = await _fetchAvatars(List<String>.from(data['selectedMembers']));
+          // Fetch avatars for the team members
+          final List<String> avatars = await _fetchAvatars(List<String>.from(data['teamMembers']));
 
-          loadedTasks[normalizedDate]?.add({
-            'title': data['taskName'],
-            'participants': avatars,
-            'duration': "${data['startTime']} - ${data['endTime']}",
+          loadedProjects[normalizedDate]?.add({
+            'title': data['projectName'],
+            'description': data['projectDescription'],
+            'team': data['team'],
+            'teamMembers': avatars,
+            'startTime': data['startTime'],
+            'endTime': data['endTime'],
           });
         }
       }
 
-      // Update state to reflect fetched tasks
+      // Update state to reflect fetched projects
       setState(() {
-        tasks.clear();
-        tasks.addAll(loadedTasks);
+        projects.clear();
+        projects.addAll(loadedProjects);
       });
     } catch (e) {
-      print("Error fetching tasks: $e");
+      print("Error fetching projects: $e");
     }
   }
 
@@ -225,7 +222,7 @@ class _CalendarPageState extends State<CalendarPage> {
     return DateTime(date.year, date.month, date.day);
   }
 
-  // Fetch avatars for participants
+  // Fetch avatars for team members
   Future<List<String>> _fetchAvatars(List<String> userIds) async {
     List<String> avatars = [];
 
@@ -248,136 +245,125 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(6.0),
       child: TableCalendar(
         focusedDay: _focusedDay,
         firstDay: DateTime(2020),
         lastDay: DateTime(2030),
         calendarFormat: CalendarFormat.month,
         selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-        eventLoader: (day) => tasks[_normalizeDate(day)] ?? [],
+        eventLoader: (day) => projects[_normalizeDate(day)] ?? [],
         onDaySelected: (selectedDay, focusedDay) {
           setState(() {
             _selectedDay = selectedDay;
             _focusedDay = focusedDay;
           });
 
-          // Show popup if tasks exist
-          if (tasks[_normalizeDate(selectedDay)] != null &&
-              tasks[_normalizeDate(selectedDay)]!.isNotEmpty) {
+          // Show popup if projects exist
+          if (projects[_normalizeDate(selectedDay)] != null &&
+              projects[_normalizeDate(selectedDay)]!.isNotEmpty) {
             showDialog(
               context: context,
-              builder: (context) => AlertDialog(
-                title: Text(
-                  "Tasks for ${_formatDate(selectedDay)}",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: tasks[_normalizeDate(selectedDay)]!.map((task) {
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12.0),
-                      padding: const EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[50], // Background color
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Task Title
-                          Text(
-                            task['title'], // Task name
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8.0),
+              builder: (context) {
+                final dayProjects = projects[_normalizeDate(selectedDay)]!;
+                return AlertDialog(
+                  title: Text(
+                    "Projects for ${_formatDate(selectedDay)}",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: dayProjects.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final project = entry.value;
 
-                          // Participants Row
-                          Row(
-                            children: [
-                              ...task['participants'].take(3).map((avatar) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 4.0),
-                                  child: CircleAvatar(
-                                    radius: 16,
-                                    backgroundImage: avatar.isNotEmpty
-                                        ? MemoryImage(Base64Decoder().convert(avatar))
-                                        : null,
-                                    child: avatar.isEmpty
-                                        ? Icon(Icons.person, color: Colors.white) // Fallback icon
-                                        : null,
-                                  ),
-                                );
-                              }),
-                              if (task['participants'].length > 3)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 4.0),
-                                  child: CircleAvatar(
-                                    radius: 16,
-                                    backgroundColor: Colors.grey[300],
-                                    child: Text(
-                                      "+${task['participants'].length - 3}",
-                                      style: TextStyle(fontSize: 10),
+                      // Define colors for cards
+                      final cardColors = [
+                        Colors.blue,
+                        Colors.pink,
+                        Colors.orange,
+                        Colors.green,
+                        Colors.purple,
+                      ];
+                      final color = cardColors[index % cardColors.length];
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12.0),
+                        padding: const EdgeInsets.all(6.0),
+                        decoration: BoxDecoration(
+                          color: color, // Dynamic color
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Project Title
+                            Text(
+                              project['title'], // Project name
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8.0),
+
+                            // Project Description
+                            Text(
+                              project['description'], // Project description
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            const SizedBox(height: 8.0),
+
+                            // Team Members
+                            Row(
+                              children: [
+                                ...project['teamMembers'].take(3).map((avatar) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 4.0),
+                                    child: CircleAvatar(
+                                      radius: 16,
+                                      backgroundImage: avatar.isNotEmpty
+                                          ? MemoryImage(Base64Decoder().convert(avatar))
+                                          : null,
+                                      child: avatar.isEmpty
+                                          ? Icon(Icons.person, color: Colors.white) // Fallback icon
+                                          : null,
                                     ),
+                                  );
+                                }),
+                                if (project['teamMembers'].length > 3)
+                                  Text('+${project['teamMembers'].length - 3}'),
+                                Spacer(),
+                                Text(
+                                  "${project['startTime']} - ${project['endTime']}",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                            ],
-                          ),
-                          const SizedBox(height: 8.0),
-
-                          // Duration
-                          Text(
-                            task['duration'], // Example placeholder duration
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[700],
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      "Close",
-                      style: TextStyle(color: Colors.blue),
-                    ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   ),
-                ],
-              ),
+                );
+              },
             );
+
           }
         },
-        calendarStyle: CalendarStyle(
-          todayDecoration: BoxDecoration(
-            color: Colors.blueAccent,
-            shape: BoxShape.circle,
-          ),
-          selectedDecoration: BoxDecoration(
-            color: Colors.orange,
-            shape: BoxShape.circle,
-          ),
-          markerDecoration: BoxDecoration(
-            color: Colors.blue,
-            shape: BoxShape.circle,
-          ),
-        ),
-        headerStyle: HeaderStyle(
-          formatButtonVisible: false,
-          titleCentered: true,
-        ),
       ),
     );
   }
 
-  // Helper to format the date
   String _formatDate(DateTime date) {
-    return "${date.day}/${date.month}/${date.year}";
+    return "${date.monthName} ${date.day}, ${date.year}";
   }
 }

@@ -34,7 +34,12 @@ class IntroPage4 extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/images/logo4.png'),
+                Spacer(),
+                Image.asset(
+                  'assets/images/logo4.png',
+                  height: 180,
+                  width: 180,
+                ),
                 const Padding(
                   padding: EdgeInsets.all(20.0),
                   child: Text("Implement", style: TextStyle(fontSize: 30),),
@@ -44,44 +49,46 @@ class IntroPage4 extends StatelessWidget {
                   child: Text(
                     "Change your life for the best "
                         "with a platform that helps you all the way.",
+
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 23),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.blueGrey,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 100),
-                    child: Container(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/create-profile');
-                        },
+                Spacer(),
+                Container(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/create-profile');
+                    },
 
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            padding: EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0)
-                            )
-                        ),
-                        child: const Text(
-                          'Create your Profile',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0)
+                        )
                     ),
-                  )
-                )
-
+                    child: const Text(
+                      'Create your Profile',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 60,),
               ],
             ),
 
           ),
 
         ),
+
+
 
       ),
     );

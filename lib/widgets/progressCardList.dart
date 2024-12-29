@@ -2,7 +2,7 @@ import 'dart:convert'; // For Base64Decoder
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:project_taskidoo/widgets/taskdetailpage.dart';
+import 'package:project_taskidoo/pages/taskdetailpage.dart';
 
 class Progresscardlist extends StatelessWidget {
   final String taskCollection = "tasks"; // Replace with your Firebase collection name
@@ -149,6 +149,9 @@ class Progresscardlist extends StatelessWidget {
               subtitle: subtitle,
               avatars: avatars,
               progress: progress,
+              startTime: startTime,
+              endTime: endTime,
+              date: taskDate,
             ),
           ),
         );

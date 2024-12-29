@@ -34,7 +34,11 @@ class IntroPage2 extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/images/logo3.png'),
+                Image.asset(
+                  'assets/images/logo3.png',
+                  height: 180,
+                  width: 180,
+                ),
                 const Padding(
                     padding: EdgeInsets.all(10.0),
                     child: Text("Research", style: TextStyle(fontSize: 30),),
@@ -45,7 +49,11 @@ class IntroPage2 extends StatelessWidget {
                         "This platform is best for scheduling and research purposes"
                         "for students of the best working caliber and help.",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 23),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.blueGrey,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                 )
               ],
