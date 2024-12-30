@@ -29,7 +29,7 @@ class IntroPage extends StatelessWidget {
                   ),
                   SizedBox(height: 20),
                   const Text(
-                    "Taskidoo",
+                    "Collabflow",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 28,
